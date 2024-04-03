@@ -12,7 +12,15 @@
   },
   "scripts": {
     "start": "ts-node ./src/index.ts",
-    "start:prod": "npm run build && node ./dist/src/server.js",
-    "build": "npx tsc"
+    "start:prod": "npm run build && node ./dist/src/index.ts",
+    "build": "npx tsc",
+    "dev": "nodemon src/index.ts"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "**/test/**",
+      "**/docs/**"
+    ],
+    "delay": 2500
   }
 }
