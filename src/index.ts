@@ -39,9 +39,10 @@ app.use('/', task);
 // };
 // app.use(loggerMiddleware);
 
-// app.get("/", (req: Request, res: Response) => {
-//   res.sendFile("./html/view.html", { root: __dirname });
-// });
+app.get("/", (req: Request, res: Response) => {
+  res.sendFile("./html/view.html", { root: __dirname });
+});
+
 
 // app.post("/profile", (req: Request, res: Response) => {
 //   const firstValue = req.body.myBio.first;

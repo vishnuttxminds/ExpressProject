@@ -1,35 +1,18 @@
 import express, { Request, Response, NextFunction } from "express";
+import {
+  arrayInsertion,
+  getAllList,
+  deleteFromArray,
+  updateIteamOfArray
+} from "../module/arrayCalcuatios";
 const router = express.Router();
-const objArray = [
-  { id: 1, name: "Jabbar" },
-  { id: 2, name: "Vishwam" },
-  { id: 3, name: "Jose" },
-  { id: 4, name: "Abu Tahir" },
-  { id: 5, name: "Mannadiyar" },
-  { id: 6, name: "Kouravar" },
-  { id: 7, name: "Chako maash" },
-];
-const actualSize = objArray.length;
 
-function arrayInsertion(item: { id: number; name: string }) {
-  const promise = new Promise<void>(function (resolve, reject) {
-    objArray.push(item);
-    if (objArray.length > actualSize) {
-      resolve();
-    } else {
-      reject();
-    }
-  });
-  return promise;
-}
-
-const calculationMiddleWare = (
+const insertMiddleWare = (
   req: Request,
   res: Response,
   next: NextFunction
 ): void => {
   const { id, name } = req.body;
-  
   if (!id || !name) {
     res.send(`Send id and name, Format : {"id" :"value","name" : "value"}`);
   } else {
@@ -44,24 +27,70 @@ const calculationMiddleWare = (
   next();
 };
 
+const deleteMiddleWare = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  const  {id}  = req.body;
+  if (!id) {
+    res.send(`Please send a id from the employee list`);
+  } else {
+    deleteFromArray(id)
+      .then(() => {
+        const empList = getAllList();
+        res.send(empList)
+        next();
+      })
+      .catch((error) => {
+        console.log(error);
+        res.send(error)
+      });
+  }
+};
+
+const updateMiddleWare = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  const { id, name } = req.body;
+  if (!id || !name) {
+    res.send(`Send existing id and updating name, Format : {"id" :"value","name" : "value"}`);
+  } else {
+    updateIteamOfArray({ id: id, name: name })
+      .then(() => {
+        const empList = getAllList();
+        res.send(empList)
+        next();
+      })
+      .catch((error) => {
+        console.log(error);
+        res.send(error)
+      });
+  }
+};
+
 router.post(
   "/post-value",
-  calculationMiddleWare,
-  (req: Request, res: Response) => {    
+  insertMiddleWare,
+  (req: Request, res: Response) => {
     res.send("employees are listed");
   }
 );
 
 router.get("/get-values", (req: Request, res: Response) => {
-  res.send(objArray);
+  const empList = getAllList();
+  res.send(empList);
 });
 
-router.delete("/delete", (req: Request, res: Response) => {
-  res.send("employees are logout");
+
+router.delete("/delete", deleteMiddleWare, (req: Request, res: Response) => {
+  res.send("One item has been removed");
 });
 
-router.delete("/logout", (req: Request, res: Response) => {
-  res.send("employees are logout");
+router.post("/update",updateMiddleWare, (req: Request, res: Response) => {
+  res.send("Update has been done");
 });
 
 export default router;
