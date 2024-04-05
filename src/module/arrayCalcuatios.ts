@@ -37,8 +37,6 @@ export const deleteFromArray = async (id: number) => {
 
 
   let itemId = await checkTheIdAvailability(id);
-
-  console.log("PARSAM > ", itemId);
   
   const promise = new Promise<void>(function (resolve, reject) {
     if (itemId !== -1) {
