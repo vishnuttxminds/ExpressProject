@@ -1,23 +1,22 @@
 import { Request, Response, NextFunction } from 'express';
 import { body, validationResult } from 'express-validator';
+import { logger } from './logger';
 
-const validateUserInput = (req: Request, res: Response, next: NextFunction) => {
-  const { id, name } = req.body;
-
-  const userValidationRules = () => {
-    return [
-      body('name').isEmail(),
-      body('id').isLength({ min: 5 }),
-    ];
-  };
-
-  const errors = validationResult(req);
-
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-
-  next();
+export const userValidationRules = () => {
+  return [
+    body('name').isEmail().withMessage('Invalid email address'),
+    body('id').isLength({ min: 5 }).withMessage('ID must be at least 5 characters long'),
+  ];
 };
 
-export default validateUserInput;
+export const validateUserInput = (req: Request, res: Response, next: NextFunction) => {
+  const errors = validationResult(req);
+  if (errors.isEmpty()) {
+    return next()
+  }
+
+  if (!errors.isEmpty()) {
+    logger.error("Erroe code : 400");
+    return res.status(400).json({ errors: errors.array()});
+  }
+};
