@@ -63,36 +63,119 @@ async function main() {
   // deleteUsersBasedOnCondition();
 
   // =========== print table values ===========
-  const allUsers = await prisma.users.findMany({
-    include: {
-      posts: true,
-      profile: true,
-    },
-  });
+  // const allUsers = await prisma.users.findMany({
+  //   include: {
+  //     posts: true,
+  //     profile: true,
+  //   },
+  // });
 
   // =========== print table values ===========
   // const allUsers = await prisma.users.findMany();
 
-  console.dir(allUsers);
+  // console.dir(allUsers);
   // deleteUsersBasedOnCondition();
 
   // =========== print table in prisma studio ===========
   // npx prisma studio
+
+  // CURD
+  // createUserAndProfile();
+  // createUserAndPosts();
+  // updateUserProfile();
+  deleteUserAndProfile(4);
 }
 
-const deleteUsersBasedOnCondition = async () => {
+const updateUserProfile = async () => {
   try {
-    const deleteResult = await prisma.user.deleteMany({
+    const newUser = await prisma.profile.update({
       where: {
-        name: {
-          startsWith: "r",
-        },
+        id: 3,
+      },
+      data: {
+        userLastName: "Komban",
       },
     });
 
-    console.log(`${deleteResult.count} user(s) deleted.`);
+    console.log("New user created:", newUser);
   } catch (error) {
-    console.error("Error deleting users:", error);
+    console.error("Error creating user and profile:", error);
+  } finally {
+    await prisma.$disconnect();
+  }
+};
+
+const deleteUserAndProfile = async (userIdToDelete: number) => {
+  try {
+    const userToDelete = await prisma.userOne.findUnique({
+      where: {
+        id: userIdToDelete,
+      },
+    });
+
+    if (!userToDelete) {
+      console.error("User not found.");
+      return;
+    }
+    if (userToDelete.id) {
+      await prisma.profile.delete({
+        where: {
+          id: userToDelete.id,
+        },
+      });
+    }
+
+    await prisma.userOne.delete({
+      where: {
+        id: userIdToDelete,
+      },
+    });
+
+    console.log("User profile details deleted successfully.");
+  } catch (error) {
+    console.error("Error deleting user and profile:", error);
+  } finally {
+    await prisma.$disconnect();
+  }
+};
+
+const createUserAndProfile = async () => {
+  try {
+    const newUser = await prisma.userOne.create({
+      data: {
+        userFirstName: "chako",
+      },
+    });
+    const newProfile = await prisma.profile.create({
+      data: {
+        userId: newUser.id,
+        userLastName: "Thoma",
+      },
+    });
+
+    console.log("New user created:", newUser);
+    console.log("New profile created:", newProfile);
+  } catch (error) {
+    console.error("Error creating user and profile:", error);
+  } finally {
+    await prisma.$disconnect();
+  }
+};
+
+const createUserAndPosts = async () => {
+  try {
+    const newUser = await prisma.userMany.create({
+      data: {},
+    });
+
+    const newPosts = await prisma.post.createMany({
+      data: [{ authorId: newUser.id }, { authorId: newUser.id }],
+    });
+
+    console.log("New user created:", newUser);
+    console.log("New posts created:", newPosts);
+  } catch (error) {
+    console.error("Error creating user and posts:", error);
   } finally {
     await prisma.$disconnect();
   }
@@ -107,6 +190,24 @@ main()
     await prisma.$disconnect();
     process.exit(1);
   });
+
+// const deleteUsersBasedOnCondition = async () => {
+//   try {
+//     const deleteResult = await prisma.user.deleteMany({
+//       where: {
+//         name: {
+//           startsWith: "r",
+//         },
+//       },
+//     });
+
+//     console.log(`${deleteResult.count} user(s) deleted.`);
+//   } catch (error) {
+//     console.error("Error deleting users:", error);
+//   } finally {
+//     await prisma.$disconnect();
+//   }
+// };
 
 // =========== middleware on express ===========
 
