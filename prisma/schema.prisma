@@ -15,13 +15,13 @@ datasource db {
 
 
 model UserOne {
-  id      Int      @id @default(autoincrement())
+  id Int @id @default(autoincrement())
   userFirstName String
   profile Profile?
 }
 
 model Profile {
-  id     Int  @id @unique(autoincrement())
+  id     Int  @id  @default(autoincrement())
   userLastName String @unique 
   user   UserOne @relation(fields: [userId], references: [id])
   userId Int  @unique 
@@ -37,4 +37,71 @@ model Post {
   id       Int  @id @default(autoincrement())
   author   UserMany @relation(fields: [authorId], references: [id])
   authorId Int
+}
+
+
+model ManyUser{
+  id    Int    @id @default(autoincrement())
+  userName String @unique 
+  posts ManyPost[]
+}
+
+model ManyPost {
+  id       Int  @id @default(autoincrement())
+  author   ManyUser @relation(fields: [authorId], references: [id])
+  authorId Int
+}
+
+
+
+model MMPost {
+  id  Int   @id @default(autoincrement())
+  title  String
+  categories MMCategoriesOnPosts[]
+}
+
+model MMCategory {
+  id    Int   @id @default(autoincrement())
+  name  String
+  posts MMCategoriesOnPosts[]
+}
+
+model MMCategoriesOnPosts {
+  post       MMPost     @relation(fields: [postId], references: [id])
+  postId     Int // relation scalar field (used in the `@relation` attribute above)
+  category   MMCategory @relation(fields: [categoryId], references: [id])
+  categoryId Int // relation scalar field (used in the `@relation` attribute above)
+  assignedAt DateTime @default(now())
+  assignedBy String 
+  
+  @@id([postId, categoryId])
+}
+
+
+
+model TokenUser {
+  id            String         @id @unique @default(uuid())
+  email         String         @unique
+  password      String
+  refreshTokens RefreshToken[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  role     TokenRole    @relation(fields: [roleId], references: [id]
+}
+
+model RefreshToken {
+  id          String   @id @unique @default(uuid())
+  hashedToken String
+  userId      String
+  TokenUser   TokenUser     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  revoked     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model TokenUserRole {
+  roleId  Int   @id @unique @default(autoincrement())
+  roleName  String
+  Roles TokenUserRole[]
+  user      TokenUser     @relation(fields: [roleId], references: [roleId])
 }
